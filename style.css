@@ -23,7 +23,7 @@ a:hover {
 }
 
 body {
-	margin: 0;
+	margin: 30;
 	display: flex;
 	place-items: center;
 	min-width: 320px;
@@ -78,7 +78,7 @@ button {
 	font-weight: 500;
 	font-family: inherit;
 	background-color: #1a1a1a;
-	cursor: pointer;
+	cursor: cell;
 	transition: border-color 0.25s;
 }
 button:hover {
@@ -154,4 +154,16 @@ html.lenis body {
 	top: 50px;
 	left: 20px;
 	z-index: 90;
+}
+
+.animaTex {
+	display: none;
+}
+
+.start {
+	display: block;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
 }

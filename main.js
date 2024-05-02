@@ -26,7 +26,7 @@ const lights = {}
 const mixers = []
 const clock = new THREE.Clock()
 const timeline = gsap.timeline({ paused: true })
-const scrollSpeed = 0.001
+const scrollSpeed = 0.0001
 let maxScrollPosition = 600
 let count = 8
 let totalScrollPosition = count * 10
@@ -39,6 +39,19 @@ const tunnelContainer = []
 //const controls = new OrbitControls(camera, renderer.domElement)
 let tunnel;
 
+//materials
+const video = document.querySelector('.animaTex')
+const animaTex = new THREE.VideoTexture(video)
+animaTex.wrapS = THREE.RepeatWrapping;
+animaTex.wrapT = THREE.RepeatWrapping;
+animaTex.repeat.set( 6,6 );
+
+const btn = document.querySelector('.start')
+btn.addEventListener('click', () => {
+	btn.style.display = 'none'
+	video.play()
+})
+
 init()
 function init() {
 	renderer.setSize(window.innerWidth, window.innerHeight)
@@ -47,62 +60,56 @@ function init() {
 
 	const elem = document.querySelector('canvas')
 
-	//textures
-	let video = document.getElementById('video');
-	video.src = ('/cute.mp4');
-	video.loop = true;
-	video.muted = true;
-	video.play();
-
-	let animaTex = new THREE.VideoTexture(video);
-	animaTex.minFilter = THREE.LinearFilter;
-	//animaTex.magFilter = THREE.LinearFilter;
-	animaTex.format = THREE.RGBFormat;
-	//let animaMat = new THREE.MeshBasicMaterial( {map:animaTex});
-
-
 	//meshes
 	meshes.default = addBoilerPlateMesh()
 	meshes.standard = addStandardMesh()
 	//meshes.tunnel1 = addTunnel({ position: new THREE.Vector3(0, 0, -3) })
 
-	// loader.load( 'tunneling.glb', function ( gltf ) {
-	// 	tunnel = gltf.scene;
-	// 	tunnel.traverse(function (child) {
-	// 		if (child.isMesh) {
-	// 			child.material = new THREE.MeshBasicMaterial({ map: animaTex });;
-	// 		}
-	// 		else {
-	// 			console.log(child.type);
-	// 		}
-	// 	})
-
-	loader.load( 'tunneling.glb', function ( gltf ) {
-		tunnel = gltf.scene;
-		tunnel.traverse(function (child) {
-			if (child instanceof THREE.Mesh) {
-				child.material = new THREE.MeshBasicMaterial({ map: animaTex });;
-			}
-			else if (child instanceof THREE.Object3D) {
-				child.traverse(function(grandchild){
-					if (grandchild instanceof THREE.Mesh) {
-						console.log('MESH FOUND');
-						grandchild.material = new THREE.MeshBasicMaterial({ map: animaTex });
-				}
-			});
-		} else {
-			console.log('ERROR', child);
-		}
-	})
-
-		/*
+	/*
 		tunnel.scale.set(1,1,1);
 		tunnel.position.set(.05,-1.25,-24.5);
 		*/
+
+	loader.load( 'tunnel_uv.glb', function ( gltf ) {
+		tunnel = gltf.scene;
+
 		tunnel.scale.set(2,1,1);
-		tunnel.position.set(.1,-1.25,-47.9);
+		tunnel.position.set(-.23,0,-28);
 		tunnel.rotation.set(0,4.71,0);
-		
+
+		tunnel.traverse((children) =>  {
+			if (children instanceof THREE.Mesh) {
+				if (children.name === 'pCube1') {
+					children.material = new THREE.MeshBasicMaterial()
+					children.material.map = animaTex
+					children.material.side = THREE.DoubleSide
+					//animaTex.magFilter = THREE.LinearFilter
+					//animaTex.wrapT = THREE.RepeatWrapping;
+				}
+				else if (children.name === 'Plane') {
+					console.log('children found')
+					children.material = new THREE.MeshBasicMaterial()
+					children.material.color.setHSL = (0,1,1)
+					children.material.side = THREE.DoubleSide
+				}
+				else if (children.name === 'Plane001') {
+					console.log('children found')
+					children.material = new THREE.MeshBasicMaterial()
+					children.material.color.setHSL = (0,1,1)
+					children.material.side = THREE.DoubleSide
+				}
+				else if (children.name === 'Plane002') {
+					console.log('children found')
+					children.material = new THREE.MeshBasicMaterial()
+					children.material.color.setHSL = (0,1,1)
+					children.material.side = THREE.DoubleSide
+				}
+				else {
+					console.log('No children found')
+				}
+			}
+			
+	})
 		scene.add(tunnel);
 	
 	}, undefined, function ( error ) {
@@ -111,29 +118,13 @@ function init() {
 	
 	} );
 
-	//textures
-	// let video = document.getElementById('video');
-	// video.src = ('cute.mp4');
-	// video.loop = true;
-	// video.mute = true;
-	// video.play();
-
-	// let animaTex = new THREE.VideoTexture.loadTexture(video);
-	// animaTex.minFilter = THREE.LinearFilter;
-	// animaTex.magFilter = THREE.LinearFilter;
-	// animaTex.format = THREE.RGBFormat;
-	// let animaMat = new THREE.MeshBasicMaterial( {map:animaTex});
-
 
 	//lights
 	lights.defaultLight = addLight()
-
-	//changes
-	meshes.default.scale.set(2, 2, 2)
-
-	//scene operations
-	// scene.add(meshes.default)
-	// scene.add(meshes.standard)
+	 const light_tunnelend = new THREE.DirectionalLight(0xfffff, 100)
+	 light_tunnelend.position.set(-.18,0,-40)
+	 light_tunnelend.target.position.set(-.18,0,-20)
+	 scene.add(light_tunnelend)
 	
 	//scene.add(meshes.tunnel1)
 	scene.add(lights.defaultLight)

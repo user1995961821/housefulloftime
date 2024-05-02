@@ -27,7 +27,7 @@ export function postprocessing(scene, camera, renderer) {
 	composer.addPass(afterPass)
 
 	const bloomPass = new UnrealBloomPass()
-	bloomPass.strength = 0.9
+	bloomPass.strength = 0.1
 	composer.addPass(bloomPass)
 	bloomPass.enabled = true
 

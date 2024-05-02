@@ -11,6 +11,7 @@ import { instance } from 'three/examples/jsm/nodes/Nodes.js'
 import { postprocessing } from './postprocessing'
 
 const scene = new THREE.Scene()
+const bloomScene = new THREE.Scene()
 const renderer = new THREE.WebGLRenderer({ antialias: true })
 const camera = new THREE.PerspectiveCamera(
 	75,
@@ -39,6 +40,7 @@ const debug2 = document.querySelector('.scrollPosition2')
 const tunnelContainer = []
 //const controls = new OrbitControls(camera, renderer.domElement)
 let tunnel;
+let meModel;
 let composer;
 
 //materials
@@ -46,7 +48,7 @@ const video = document.querySelector('.animaTex')
 const animaTex = new THREE.VideoTexture(video)
 animaTex.wrapS = THREE.RepeatWrapping;
 animaTex.wrapT = THREE.RepeatWrapping;
-animaTex.repeat.set( 6,6 );
+animaTex.repeat.set( 6.5,6.5 );
 
 const btn = document.querySelector('.start')
 btn.addEventListener('click', () => {
@@ -55,6 +57,7 @@ btn.addEventListener('click', () => {
 })
 
 init()
+
 function init() {
 	renderer.setSize(window.innerWidth, window.innerHeight)
 	const content = document.getElementById('smooth-content')
@@ -115,6 +118,7 @@ function init() {
 		console.error( error );
 	
 	} );
+	loadMe();
 
 	//bloom
 	composer = postprocessing(scene, camera, renderer)
@@ -124,7 +128,7 @@ function init() {
 	 const light_tunnelend = new THREE.DirectionalLight(0xfffff, 100)
 	 light_tunnelend.position.set(-.18,0,-40)
 	 light_tunnelend.target.position.set(-.18,0,-20)
-	 scene.add(light_tunnelend)
+	 //scene.add(light_tunnelend)
 	
 	//scene.add(meshes.tunnel1)
 	scene.add(lights.defaultLight)
@@ -142,18 +146,33 @@ function addTD() {
 		let geometry = new THREE.BoxGeometry(.1,.1,.1)
 		let material = new THREE.MeshPhongMaterial()
 		let mesh = new THREE.InstancedMesh(geometry,material,instanceData.length)
-
 		let matrix = new THREE.Matrix4()
+
 		for (let i=0; i<instanceData.length; i++) {
 			let inst = instanceData[i]
 			let pos = new THREE.Vector3(inst['tx'],inst['ty'],inst['tz'])
 			matrix.setPosition(pos)
 			mesh.setMatrixAt(i,matrix)
 		}
+		//bloomScene.add(mesh)
 		scene.add(mesh)
 		camera.position.z =18
-		composer.bloom.enabled = true
+		//composer.bloom.enabled = true
 	})
+}
+
+function loadMe() {
+	loader.load('hug_pose_annie.glb', function (gltf) {
+        meModel = gltf.scene;
+
+        // Position the second model at the end of the first tunnel
+        meModel.position.set(1,-8,-25.8);
+		meModel.rotation.set(0,1.5,0);
+
+        scene.add(meModel);
+    }, undefined, function (error) {
+        console.error(error);
+    });
 }
 
 function createTunnels(numTunnels) {
@@ -212,5 +231,7 @@ function animate() {
 	//console.log(scene.children[1].children[0].material)
 
 	renderer.render(scene, camera)
+	//renderer.render(bloomScene, camera)
 	composer.composer.render()
+
 }

@@ -8,6 +8,7 @@ import { addTunnel } from './addMeshes'
 import gsap from 'gsap'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { instance } from 'three/examples/jsm/nodes/Nodes.js'
+import { postprocessing } from './postprocessing'
 
 const scene = new THREE.Scene()
 const renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -38,6 +39,7 @@ const debug2 = document.querySelector('.scrollPosition2')
 const tunnelContainer = []
 //const controls = new OrbitControls(camera, renderer.domElement)
 let tunnel;
+let composer;
 
 //materials
 const video = document.querySelector('.animaTex')
@@ -65,11 +67,7 @@ function init() {
 	meshes.standard = addStandardMesh()
 	//meshes.tunnel1 = addTunnel({ position: new THREE.Vector3(0, 0, -3) })
 
-	/*
-		tunnel.scale.set(1,1,1);
-		tunnel.position.set(.05,-1.25,-24.5);
-		*/
-
+	//loading tunnel glb
 	loader.load( 'tunnel_uv.glb', function ( gltf ) {
 		tunnel = gltf.scene;
 
@@ -77,14 +75,14 @@ function init() {
 		tunnel.position.set(-.23,0,-15);
 		tunnel.rotation.set(0,4.71,0);
 
+		//setting materials for 3D components within mesh
 		tunnel.traverse((children) =>  {
 			if (children instanceof THREE.Mesh) {
+				//composer.bloom.enabled = false
 				if (children.name === 'pCube1') {
 					children.material = new THREE.MeshBasicMaterial()
 					children.material.map = animaTex
 					children.material.side = THREE.DoubleSide
-					//animaTex.magFilter = THREE.LinearFilter
-					//animaTex.wrapT = THREE.RepeatWrapping;
 				}
 				else if (children.name === 'Plane') {
 					console.log('children found')
@@ -118,6 +116,8 @@ function init() {
 	
 	} );
 
+	//bloom
+	composer = postprocessing(scene, camera, renderer)
 
 	//lights
 	lights.defaultLight = addLight()
@@ -152,6 +152,7 @@ function addTD() {
 		}
 		scene.add(mesh)
 		camera.position.z =18
+		composer.bloom.enabled = true
 	})
 }
 
@@ -211,4 +212,5 @@ function animate() {
 	//console.log(scene.children[1].children[0].material)
 
 	renderer.render(scene, camera)
+	composer.composer.render()
 }

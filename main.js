@@ -74,7 +74,7 @@ function init() {
 		tunnel = gltf.scene;
 
 		tunnel.scale.set(2,1,1);
-		tunnel.position.set(-.23,0,-28);
+		tunnel.position.set(-.23,0,-15);
 		tunnel.rotation.set(0,4.71,0);
 
 		tunnel.traverse((children) =>  {
@@ -129,10 +129,30 @@ function init() {
 	//scene.add(meshes.tunnel1)
 	scene.add(lights.defaultLight)
 
+	addTD()
 	handleScroll()
 	//createTunnels(count)
 	resize()
 	animate()
+}
+
+//based on https://github.com/benjaminben/td-threejs-tutorial
+function addTD() {
+	fetch('instances.json').then(r=>r.json()).then(instanceData => {
+		let geometry = new THREE.BoxGeometry(.1,.1,.1)
+		let material = new THREE.MeshPhongMaterial()
+		let mesh = new THREE.InstancedMesh(geometry,material,instanceData.length)
+
+		let matrix = new THREE.Matrix4()
+		for (let i=0; i<instanceData.length; i++) {
+			let inst = instanceData[i]
+			let pos = new THREE.Vector3(inst['tx'],inst['ty'],inst['tz'])
+			matrix.setPosition(pos)
+			mesh.setMatrixAt(i,matrix)
+		}
+		scene.add(mesh)
+		camera.position.z =18
+	})
 }
 
 function createTunnels(numTunnels) {

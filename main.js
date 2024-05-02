@@ -19,6 +19,7 @@ const camera = new THREE.PerspectiveCamera(
 	0.1,
 	400
 )
+camera.position.z =18
 // camera.position.set(0, 0, -79)
 const loader = new GLTFLoader();
 
